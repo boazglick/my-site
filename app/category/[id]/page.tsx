@@ -30,8 +30,16 @@ export default function CategoryPage() {
 
   return (
     <div style={{ padding: "1rem" }}>
-      <h1 style={{ textAlign: "center" }}>Category</h1>
-      <div style={{ display: "grid", gap: "1rem" }}>
+      <h1 style={{ textAlign: "center", marginBottom: "1rem" }}>Category</h1>
+      
+      {/* Grid Container */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+          gap: "1rem",
+        }}
+      >
         {/* Display folders as buttons */}
         {items
           .filter((item) => item.mimeType === "application/vnd.google-apps.folder")
@@ -39,14 +47,14 @@ export default function CategoryPage() {
             <button
               key={folder.id}
               style={{
-                display: "block",
-                width: "100%",
                 padding: "1rem",
                 textAlign: "center",
                 background: "#5d5c5c",
+                color: "#fff",
                 borderRadius: "8px",
                 border: "1px solid #ccc",
                 fontSize: "1rem",
+                cursor: "pointer",
               }}
               onClick={() => (window.location.href = `/category/${folder.id}`)}
             >
@@ -65,9 +73,13 @@ export default function CategoryPage() {
                 padding: "1rem",
                 border: "1px solid #ddd",
                 borderRadius: "8px",
+                background: "#f9f9f9",
               }}
             >
-              <a href={`/image/${image.id}`}>
+              <a
+                href={`/image/${image.id}`}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
                 <img
                   src={image.thumbnailLink || "/placeholder.png"} // Fallback thumbnail
                   alt={image.name}
@@ -75,15 +87,26 @@ export default function CategoryPage() {
                     maxWidth: "100%",
                     height: "auto",
                     marginBottom: "0.5rem",
+                    borderRadius: "4px",
                   }}
                 />
-                <p>{image.name}</p>
+                <p style={{ fontSize: "1rem", fontWeight: "bold" }}>{image.name}</p>
               </a>
             </div>
           ))}
       </div>
+
+      {/* Back to Home Button */}
       <div style={{ marginTop: "2rem", textAlign: "center" }}>
-        <a href="/" style={{ textDecoration: "none", color: "blue" }}>
+        <a
+          href="/"
+          style={{
+            textDecoration: "none",
+            color: "#007acc",
+            fontSize: "1rem",
+            fontWeight: "bold",
+          }}
+        >
           Back to Home
         </a>
       </div>
