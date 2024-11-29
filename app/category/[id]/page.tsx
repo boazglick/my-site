@@ -43,7 +43,7 @@ export default function CategoryPage() {
                 width: "100%",
                 padding: "1rem",
                 textAlign: "center",
-                background: "#f0f0f0",
+                background: "#5d5c5c",
                 borderRadius: "8px",
                 border: "1px solid #ccc",
                 fontSize: "1rem",
