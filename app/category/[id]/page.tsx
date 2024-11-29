@@ -3,17 +3,11 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
-// Define a TypeScript interface for the Google Drive API file items
-interface DriveItem {
-  id: string;
-  name: string;
-  mimeType: string;
-}
-
 export default function CategoryPage() {
   const { id } = useParams(); // The folder ID passed from the URL
-  const [items, setItems] = useState<DriveItem[]>([]); // Use the DriveItem[] type
+  const [items, setItems] = useState([]);
 
+  // Updated useEffect for fetching items
   useEffect(() => {
     const fetchItems = async () => {
       const apiKey = "AIzaSyDtQcbLJO5wYNBcAjsvBTkyespCa57RHmU";
@@ -21,7 +15,8 @@ export default function CategoryPage() {
         `https://www.googleapis.com/drive/v3/files?q='${id}'+in+parents&key=${apiKey}`
       );
       const data = await response.json();
-      setItems(data.files || []); // Ensure `files` exists in the response
+      console.log(data); // Log the response data to inspect the API output
+      setItems(data.files); // Update state with the returned files
     };
 
     fetchItems();
@@ -36,7 +31,11 @@ export default function CategoryPage() {
             {item.mimeType === "application/vnd.google-apps.folder" ? (
               <a href={`/category/${item.id}`}>{item.name}</a>
             ) : (
-              <a href={`/image/${item.id}`}>{item.name}</a>
+              <img
+                src={item.thumbnailLink || "/default-image.png"}
+                alt={item.name}
+                style={{ width: "200px", height: "auto" }}
+              />
             )}
           </li>
         ))}
