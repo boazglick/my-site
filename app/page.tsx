@@ -2,8 +2,14 @@
 
 import { useEffect, useState } from "react";
 
-export default function Home() {
-  const [categories, setCategories] = useState([]);
+// Define a TypeScript interface for categories
+interface Category {
+  id: string;
+  name: string;
+}
+
+export default function HomePage() {
+  const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -13,7 +19,7 @@ export default function Home() {
         `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents&key=${apiKey}`
       );
       const data = await response.json();
-      setCategories(data.files); // `files` contains folders and files
+      setCategories(data.files || []); // Ensure files exist in the response
     };
 
     fetchCategories();
@@ -21,7 +27,7 @@ export default function Home() {
 
   return (
     <div>
-      <h1>Main Categories</h1>
+      <h1>Categories</h1>
       <ul>
         {categories.map((category) => (
           <li key={category.id}>
