@@ -40,9 +40,10 @@ export default function ImagePage() {
         const imageList = categoryData.files || [];
         setImages(imageList);
 
-        const currentIdx = imageList.findIndex((img) => img.id === id);
+        // Use findIndex with proper typing
+        const currentIdx = imageList.findIndex((img: ImageItem) => img.id === id);
         setCurrentIndex(currentIdx);
-      } catch (error) {
+              } catch (error) {
         console.error("Error fetching image data:", error);
       }
     };
