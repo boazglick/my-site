@@ -26,15 +26,51 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div>
-      <h1>Categories</h1>
-      <ul>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "100vh",
+        padding: "1rem",
+      }}
+    >
+      {/* Logo */}
+      <img
+        src="/logo.png" // Replace with your actual logo file path
+        alt="App Logo"
+        style={{ maxWidth: "200px", marginBottom: "2rem" }}
+      />
+
+      {/* Buttons for categories */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+          gap: "1rem",
+          width: "100%",
+          maxWidth: "600px",
+        }}
+      >
         {categories.map((category) => (
-          <li key={category.id}>
-            <a href={`/category/${category.id}`}>{category.name}</a>
-          </li>
+          <button
+            key={category.id}
+            style={{
+              padding: "1rem",
+              fontSize: "1rem",
+              background: "#add8e6", // Light blue background
+              border: "1px solid #ccc",
+              borderRadius: "8px",
+              textAlign: "center",
+              cursor: "pointer",
+            }}
+            onClick={() => (window.location.href = `/category/${category.id}`)}
+          >
+            {category.name}
+          </button>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
