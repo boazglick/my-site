@@ -9,39 +9,39 @@ interface ImageItem {
 }
 
 export default function ImagePage() {
-  const { id } = useParams(); // Get the image ID from the URL
+  const { id } = useParams(); // Get the current image ID from the URL
   const router = useRouter();
-  const [images, setImages] = useState<ImageItem[]>([]); // All images in the category
-  const [currentImageIndex, setCurrentImageIndex] = useState(-1); // Index of the current image
+  const [images, setImages] = useState<ImageItem[]>([]); // Store all images in the category
+  const [currentIndex, setCurrentIndex] = useState(-1); // Index of the current image
   const [imageName, setImageName] = useState("Loading...");
 
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const apiKey = "YOUR_GOOGLE_API_KEY";
-        const response = await fetch(
-          `https://www.googleapis.com/drive/v3/files/${id}?fields=parents,name&key=${apiKey}`
+        const apiKey = "AIzaSyDtQcbLJO5wYNBcAjsvBTkyespCa57RHmU";
+        const imageResponse = await fetch(
+          `https://www.googleapis.com/drive/v3/files/${id}?fields=name,parents&key=${apiKey}`
         );
-        const imageData = await response.json();
+        const imageData = await imageResponse.json();
 
         if (!imageData.parents || imageData.parents.length === 0) {
-          console.error("No parent folder found for this image");
+          console.error("No parent folder found for this image.");
           return;
         }
 
-        const categoryId = imageData.parents[0]; // Safely access the first parent
-        setImageName(imageData.name || "Image Viewer");
+        const categoryId = imageData.parents[0]; // Parent folder ID
+        setImageName(imageData.name);
 
         const categoryResponse = await fetch(
           `https://www.googleapis.com/drive/v3/files?q='${categoryId}'+in+parents&fields=files(id,name)&key=${apiKey}`
         );
         const categoryData = await categoryResponse.json();
-        const imageList = categoryData.files || [];
 
+        const imageList = categoryData.files || [];
         setImages(imageList);
 
-        const currentIndex = imageList.findIndex((img) => img.id === id);
-        setCurrentImageIndex(currentIndex);
+        const currentIdx = imageList.findIndex((img) => img.id === id);
+        setCurrentIndex(currentIdx);
       } catch (error) {
         console.error("Error fetching image data:", error);
       }
@@ -50,61 +50,26 @@ export default function ImagePage() {
     fetchImages();
   }, [id]);
 
-  // Navigate to the next or previous image
-  const navigateToImage = (direction: "left" | "right") => {
-    if (direction === "right" && currentImageIndex < images.length - 1) {
-      const nextImage = images[currentImageIndex + 1];
+  const handleNext = () => {
+    if (currentIndex < images.length - 1) {
+      const nextImage = images[currentIndex + 1];
       router.push(`/image/${nextImage.id}`);
-    } else if (direction === "left" && currentImageIndex > 0) {
-      const previousImage = images[currentImageIndex - 1];
-      router.push(`/image/${previousImage.id}`);
     }
   };
 
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "ArrowRight") navigateToImage("right");
-      else if (event.key === "ArrowLeft") navigateToImage("left");
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [currentImageIndex, images]);
-
-  // Swipe navigation for mobile
-  useEffect(() => {
-    let startX: number | null = null;
-
-    const handleTouchStart = (event: TouchEvent) => {
-      startX = event.touches[0].clientX;
-    };
-
-    const handleTouchEnd = (event: TouchEvent) => {
-      if (startX === null) return;
-
-      const endX = event.changedTouches[0].clientX;
-      const deltaX = endX - startX;
-
-      if (deltaX > 50) navigateToImage("left"); // Swipe left
-      else if (deltaX < -50) navigateToImage("right"); // Swipe right
-
-      startX = null;
-    };
-
-    document.addEventListener("touchstart", handleTouchStart);
-    document.addEventListener("touchend", handleTouchEnd);
-
-    return () => {
-      document.removeEventListener("touchstart", handleTouchStart);
-      document.removeEventListener("touchend", handleTouchEnd);
-    };
-  }, [currentImageIndex, images]);
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      const prevImage = images[currentIndex - 1];
+      router.push(`/image/${prevImage.id}`);
+    }
+  };
 
   return (
     <div style={{ padding: "1rem" }}>
-      <h1 style={{ textAlign: "center" }}>{imageName}</h1>
+      {/* Display the image name */}
+      <h1 style={{ textAlign: "center", marginBottom: "1rem" }}>{imageName}</h1>
+
+      {/* Embed the image using iframe */}
       <div
         style={{
           position: "relative",
@@ -128,6 +93,8 @@ export default function ImagePage() {
           allowFullScreen
         ></iframe>
       </div>
+
+      {/* Navigation buttons */}
       <div
         style={{
           marginTop: "1rem",
@@ -136,8 +103,77 @@ export default function ImagePage() {
           gap: "1rem",
         }}
       >
-        <button onClick={() => router.push("/")}>Back to Home</button>
-        <button onClick={() => router.back()}>Back to Previous Category</button>
+        <button
+          style={{
+            padding: "0.5rem 1rem",
+            fontSize: "1rem",
+            backgroundColor: currentIndex > 0 ? "#5d5c5c" : "#ddd",
+            color: "#fff",
+            borderRadius: "8px",
+            border: "1px solid #ccc",
+            cursor: currentIndex > 0 ? "pointer" : "not-allowed",
+          }}
+          disabled={currentIndex <= 0}
+          onClick={handlePrevious}
+        >
+          Previous
+        </button>
+        <button
+          style={{
+            padding: "0.5rem 1rem",
+            fontSize: "1rem",
+            backgroundColor:
+              currentIndex < images.length - 1 ? "#5d5c5c" : "#ddd",
+            color: "#fff",
+            borderRadius: "8px",
+            border: "1px solid #ccc",
+            cursor:
+              currentIndex < images.length - 1 ? "pointer" : "not-allowed",
+          }}
+          disabled={currentIndex >= images.length - 1}
+          onClick={handleNext}
+        >
+          Next
+        </button>
+      </div>
+
+      {/* Back navigation buttons */}
+      <div
+        style={{
+          marginTop: "1rem",
+          display: "flex",
+          justifyContent: "center",
+          gap: "1rem",
+        }}
+      >
+        <button
+          style={{
+            padding: "0.5rem 1rem",
+            fontSize: "1rem",
+            backgroundColor: "#5d5c5c",
+            color: "#fff",
+            borderRadius: "8px",
+            border: "1px solid #ccc",
+            cursor: "pointer",
+          }}
+          onClick={() => router.push("/")}
+        >
+          Back to Home
+        </button>
+        <button
+          style={{
+            padding: "0.5rem 1rem",
+            fontSize: "1rem",
+            backgroundColor: "#5d5c5c",
+            color: "#fff",
+            borderRadius: "8px",
+            border: "1px solid #ccc",
+            cursor: "pointer",
+          }}
+          onClick={() => router.back()}
+        >
+          Back to Previous Category
+        </button>
       </div>
     </div>
   );
