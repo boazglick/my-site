@@ -3,31 +3,115 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+// Define a type for the image items
+interface ImageItem {
+  id: string;
+  name: string;
+}
+
 export default function ImagePage() {
-  const { id } = useParams(); // The file ID passed from the URL
+  const { id } = useParams(); // The file ID of the image from the URL
   const router = useRouter();
-  const iframeUrl = `https://drive.google.com/file/d/${id}/preview`; // Using Google Drive's embed preview link
+  const [images, setImages] = useState<ImageItem[]>([]); // Store all images in the category
+  const [currentImageIndex, setCurrentImageIndex] = useState<number>(-1); // Track the current image index
   const [imageName, setImageName] = useState("Loading...");
 
+  // Fetch image list in the category dynamically using the "parent" ID of the image
   useEffect(() => {
-    const fetchImageData = async () => {
+    const fetchImages = async () => {
       const apiKey = "AIzaSyDtQcbLJO5wYNBcAjsvBTkyespCa57RHmU"; // Replace with your actual API key
-      const response = await fetch(
-        `https://www.googleapis.com/drive/v3/files/${id}?fields=name&key=${apiKey}`
+
+      // Fetch image details to get the parent category ID
+      const imageResponse = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${id}?fields=parents,name&key=${apiKey}`
       );
-      const data = await response.json();
-      setImageName(data.name || "Image Viewer"); // Fallback if no name is returned
+      const imageData = await imageResponse.json();
+
+      if (!imageData.parents || imageData.parents.length === 0) {
+        console.error("Parent folder not found.");
+        return;
+      }
+
+      const categoryId = imageData.parents[0]; // Get the parent category ID
+      setImageName(imageData.name || "Image Viewer");
+
+      // Fetch all files in the parent category
+      const categoryResponse = await fetch(
+        `https://www.googleapis.com/drive/v3/files?q='${categoryId}'+in+parents&fields=files(id,name)&key=${apiKey}`
+      );
+      const categoryData = await categoryResponse.json();
+
+      const imageList = categoryData.files || [];
+      setImages(imageList);
+
+      // Find the index of the current image in the category
+      const currentIndex = imageList.findIndex((image: ImageItem) => image.id === id);
+      setCurrentImageIndex(currentIndex);
     };
 
-    fetchImageData();
+    fetchImages();
   }, [id]);
+
+  // Navigate to the next or previous image
+  const navigateToImage = (direction: "left" | "right") => {
+    if (direction === "right" && currentImageIndex < images.length - 1) {
+      const nextImage = images[currentImageIndex + 1];
+      router.push(`/image/${nextImage.id}`);
+    } else if (direction === "left" && currentImageIndex > 0) {
+      const previousImage = images[currentImageIndex - 1];
+      router.push(`/image/${previousImage.id}`);
+    }
+  };
+
+  // Add keyboard event listeners for navigation
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "ArrowRight") {
+        navigateToImage("right"); // Go to the next image
+      } else if (event.key === "ArrowLeft") {
+        navigateToImage("left"); // Go to the previous image
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [currentImageIndex, images]);
+
+  // Add swipe event listeners for mobile
+  useEffect(() => {
+    const handleTouchStart = (event: TouchEvent) => {
+      const startX = event.touches[0].clientX;
+
+      const handleTouchEnd = (endEvent: TouchEvent) => {
+        const endX = endEvent.changedTouches[0].clientX;
+        const deltaX = endX - startX;
+
+        if (deltaX > 50) {
+          navigateToImage("left");
+        } else if (deltaX < -50) {
+          navigateToImage("right");
+        }
+
+        document.removeEventListener("touchend", handleTouchEnd);
+      };
+
+      document.addEventListener("touchend", handleTouchEnd);
+    };
+
+    document.addEventListener("touchstart", handleTouchStart);
+
+    return () => {
+      document.removeEventListener("touchstart", handleTouchStart);
+    };
+  }, [currentImageIndex, images]);
 
   return (
     <div style={{ padding: "1rem" }}>
       {/* Dynamic title */}
-      <h1 style={{ textAlign: "center", marginBottom: "1rem" }}>
-        {imageName}
-      </h1>
+      <h1 style={{ textAlign: "center", marginBottom: "1rem" }}>{imageName}</h1>
 
       {/* Responsive iframe */}
       <div
@@ -40,7 +124,7 @@ export default function ImagePage() {
         }}
       >
         <iframe
-          src={iframeUrl}
+          src={`https://drive.google.com/file/d/${id}/preview`}
           title={imageName}
           style={{
             position: "absolute",
