@@ -67,6 +67,12 @@ export default function ImagePage() {
     }
   };
 
+  const handleWhatsAppShare = () => {
+    const currentUrl = window.location.href;
+    const whatsappUrl = `https://wa.me/972723969466?text=${encodeURIComponent(currentUrl)}`;
+    window.open(whatsappUrl, "_blank");
+  };
+
   return (
     <div style={{ padding: "1rem" }}>
       {/* Dynamic title */}
@@ -190,6 +196,24 @@ export default function ImagePage() {
             Back to Category
           </button>
         )}
+      </div>
+
+      {/* WhatsApp Share Button */}
+      <div style={{ marginTop: "1rem", textAlign: "center" }}>
+        <button
+          onClick={handleWhatsAppShare}
+          style={{
+            padding: "0.5rem 1rem",
+            fontSize: "1rem",
+            backgroundColor: "#25D366",
+            color: "#fff",
+            borderRadius: "8px",
+            border: "1px solid #ccc",
+            cursor: "pointer",
+          }}
+        >
+          Share on WhatsApp
+        </button>
       </div>
     </div>
   );
