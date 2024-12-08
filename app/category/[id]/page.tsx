@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Head from "next/head";
 
 // Define a type for items
 interface DriveItem {
@@ -14,6 +15,7 @@ interface DriveItem {
 export default function CategoryPage() {
   const { id } = useParams(); // Folder ID from URL
   const [items, setItems] = useState<DriveItem[]>([]); // Set the state type
+  const [categoryName, setCategoryName] = useState<string>("");
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -23,93 +25,106 @@ export default function CategoryPage() {
       );
       const data = await response.json();
       setItems(data.files || []); // Ensure it sets an array even if no files are returned
+
+      // Fetch the folder details to get the category name
+      const folderResponse = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${id}?fields=name&key=${apiKey}`
+      );
+      const folderData = await folderResponse.json();
+      setCategoryName(folderData.name || "Category");
     };
 
     fetchItems();
   }, [id]);
 
   return (
-    <div style={{ padding: "1rem" }}>
-      <h1 style={{ textAlign: "center", marginBottom: "1rem" }}>Category</h1>
-      
-      {/* Grid Container */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-          gap: "1rem",
-        }}
-      >
-        {/* Display folders as buttons */}
-        {items
-          .filter((item) => item.mimeType === "application/vnd.google-apps.folder")
-          .map((folder) => (
-            <button
-              key={folder.id}
-              style={{
-                padding: "1rem",
-                textAlign: "center",
-                background: "#5d5c5c",
-                color: "#fff",
-                borderRadius: "8px",
-                border: "1px solid #ccc",
-                fontSize: "1rem",
-                cursor: "pointer",
-              }}
-              onClick={() => (window.location.href = `/category/${folder.id}`)}
-            >
-              {folder.name}
-            </button>
-          ))}
-
-        {/* Display images with thumbnails */}
-        {items
-          .filter((item) => item.mimeType !== "application/vnd.google-apps.folder")
-          .map((image) => (
-            <div
-              key={image.id}
-              style={{
-                textAlign: "center",
-                padding: "1rem",
-                border: "1px solid #ddd",
-                borderRadius: "8px",
-                background: "#f9f9f9",
-              }}
-            >
-              <a
-                href={`/image/${image.id}`}
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                <img
-                  src={image.thumbnailLink || "/placeholder.png"} // Fallback thumbnail
-                  alt={image.name}
-                  style={{
-                    maxWidth: "100%",
-                    height: "auto",
-                    marginBottom: "0.5rem",
-                    borderRadius: "4px",
-                  }}
-                />
-                <p style={{ fontSize: "1rem", fontWeight: "bold" }}>{image.name}</p>
-              </a>
-            </div>
-          ))}
-      </div>
-
-      {/* Back to Home Button */}
-      <div style={{ marginTop: "2rem", textAlign: "center" }}>
-        <a
-          href="/"
+    <>
+      <Head>
+        <title>{categoryName} - KavKav app</title>
+        <meta name="description" content={`Items in the ${categoryName} category`} />
+      </Head>
+      <div style={{ padding: "1rem" }}>
+        <h1 style={{ textAlign: "center", marginBottom: "1rem" }}>{categoryName}</h1>
+        
+        {/* Grid Container */}
+        <div
           style={{
-            textDecoration: "none",
-            color: "#007acc",
-            fontSize: "1rem",
-            fontWeight: "bold",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "1rem",
           }}
         >
-          Back to Home
-        </a>
+          {/* Display folders as buttons */}
+          {items
+            .filter((item) => item.mimeType === "application/vnd.google-apps.folder")
+            .map((folder) => (
+              <button
+                key={folder.id}
+                style={{
+                  padding: "1rem",
+                  textAlign: "center",
+                  background: "#5d5c5c",
+                  color: "#fff",
+                  borderRadius: "8px",
+                  border: "1px solid #ccc",
+                  fontSize: "1rem",
+                  cursor: "pointer",
+                }}
+                onClick={() => (window.location.href = `/category/${folder.id}`)}
+              >
+                {folder.name}
+              </button>
+            ))}
+
+          {/* Display images with thumbnails */}
+          {items
+            .filter((item) => item.mimeType !== "application/vnd.google-apps.folder")
+            .map((image) => (
+              <div
+                key={image.id}
+                style={{
+                  textAlign: "center",
+                  padding: "1rem",
+                  border: "1px solid #ddd",
+                  borderRadius: "8px",
+                  background: "#f9f9f9",
+                }}
+              >
+                <a
+                  href={`/image/${image.id}`}
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
+                  <img
+                    src={image.thumbnailLink || "/placeholder.png"} // Fallback thumbnail
+                    alt={image.name}
+                    style={{
+                      maxWidth: "100%",
+                      height: "auto",
+                      marginBottom: "0.5rem",
+                      borderRadius: "4px",
+                    }}
+                  />
+                  <p style={{ fontSize: "1rem", fontWeight: "bold" }}>{image.name}</p>
+                </a>
+              </div>
+            ))}
+        </div>
+
+        {/* Back to Home Button */}
+        <div style={{ marginTop: "2rem", textAlign: "center" }}>
+          <a
+            href="/"
+            style={{
+              textDecoration: "none",
+              color: "#007acc",
+              fontSize: "1rem",
+              fontWeight: "bold",
+            }}
+          >
+            Back to Home
+          </a>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
