@@ -4,79 +4,37 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function ImagePage() {
-  const { id } = useParams(); // Current image ID
+  const { id } = useParams(); // The file ID passed from the URL
   const router = useRouter();
-  const iframeUrl = `https://drive.google.com/file/d/${id}/preview`; // Google Drive embed preview link
-
+  const iframeUrl = `https://drive.google.com/file/d/${id}/preview`; // Using Google Drive's embed preview link
   const [imageName, setImageName] = useState("Loading...");
-  const [images, setImages] = useState<string[]>([]); // Store the list of image IDs
-  const [currentIndex, setCurrentIndex] = useState<number | null>(null);
-  const [categoryId, setCategoryId] = useState<string | null>(null); // Store the category ID
+  const [imageUrl, setImageUrl] = useState("");
 
   useEffect(() => {
     const fetchImageData = async () => {
-      try {
-        const apiKey = "AIzaSyDtQcbLJO5wYNBcAjsvBTkyespCa57RHmU"; // Replace with your actual API key
-
-        // Fetch the current image metadata to get its parent folder
-        const imageResponse = await fetch(
-          `https://www.googleapis.com/drive/v3/files/${id}?fields=name,parents&key=${apiKey}`
-        );
-        const imageData = await imageResponse.json();
-
-        if (!imageData.parents || imageData.parents.length === 0) {
-          console.error("Error: No parent folder found for this image.");
-          return;
-        }
-
-        const parentId = imageData.parents[0];
-        setCategoryId(parentId);
-        setImageName(imageData.name || "Image Viewer");
-
-        // Fetch all images in the parent folder
-        const folderResponse = await fetch(
-          `https://www.googleapis.com/drive/v3/files?q='${parentId}'+in+parents&fields=files(id)&key=${apiKey}`
-        );
-        const folderData = await folderResponse.json();
-        const imageList = folderData.files.map((file: { id: string }) => file.id);
-
-        setImages(imageList);
-
-        // Find the current image index
-        const currentIdx = imageList.indexOf(id);
-        setCurrentIndex(currentIdx);
-      } catch (error) {
-        console.error("Error fetching image data:", error);
-      }
+      const apiKey = "AIzaSyDtQcbLJO5wYNBcAjsvBTkyespCa57RHmU"; // Replace with your actual API key
+      const response = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${id}?fields=name,webContentLink&key=${apiKey}`
+      );
+      const data = await response.json();
+      setImageName(data.name || "Image Viewer"); // Fallback if no name is returned
+      setImageUrl(data.webContentLink || ""); // Set the image URL
     };
 
     fetchImageData();
   }, [id]);
 
-  const handleNext = () => {
-    if (currentIndex !== null && images.length > currentIndex + 1) {
-      const nextImageId = images[currentIndex + 1];
-      router.push(`/image/${nextImageId}`);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentIndex !== null && currentIndex > 0) {
-      const previousImageId = images[currentIndex - 1];
-      router.push(`/image/${previousImageId}`);
-    }
-  };
-
   const handleWhatsAppShare = () => {
-    const currentUrl = window.location.href;
-    const whatsappUrl = `https://wa.me/972723969466?text=${encodeURIComponent(currentUrl)}`;
+    const whatsappUrl = `https://wa.me/972723969466?text=${encodeURIComponent(imageUrl)}`;
     window.open(whatsappUrl, "_blank");
   };
 
   return (
     <div style={{ padding: "1rem" }}>
       {/* Dynamic title */}
-      <h1 style={{ textAlign: "center", marginBottom: "1rem" }}>{imageName}</h1>
+      <h1 style={{ textAlign: "center", marginBottom: "1rem" }}>
+        {imageName}
+      </h1>
 
       {/* Responsive iframe */}
       <div
@@ -113,89 +71,33 @@ export default function ImagePage() {
         }}
       >
         <button
-          onClick={handlePrevious}
-          disabled={currentIndex === 0 || currentIndex === null}
           style={{
             padding: "0.5rem 1rem",
             fontSize: "1rem",
-            backgroundColor:
-              currentIndex === 0 || currentIndex === null ? "#ccc" : "#5d5c5c",
-            color: "#fff",
-            borderRadius: "8px",
-            border: "1px solid #ccc",
-            cursor:
-              currentIndex === 0 || currentIndex === null
-                ? "not-allowed"
-                : "pointer",
-          }}
-        >
-          Previous Image
-        </button>
-
-        <button
-          onClick={handleNext}
-          disabled={
-            currentIndex === null || currentIndex === images.length - 1
-          }
-          style={{
-            padding: "0.5rem 1rem",
-            fontSize: "1rem",
-            backgroundColor:
-              currentIndex === null || currentIndex === images.length - 1
-                ? "#ccc"
-                : "#5d5c5c",
-            color: "#fff",
-            borderRadius: "8px",
-            border: "1px solid #ccc",
-            cursor:
-              currentIndex === null || currentIndex === images.length - 1
-                ? "not-allowed"
-                : "pointer",
-          }}
-        >
-          Next Image
-        </button>
-      </div>
-
-      {/* Navigation to Home and Category */}
-      <div
-        style={{
-          marginTop: "1rem",
-          display: "flex",
-          justifyContent: "center",
-          gap: "1rem",
-        }}
-      >
-        <button
-          onClick={() => router.push("/")}
-          style={{
-            padding: "0.5rem 1rem",
-            fontSize: "1rem",
-            backgroundColor: "#007bff",
+            backgroundColor: "#5d5c5c",
             color: "#fff",
             borderRadius: "8px",
             border: "1px solid #ccc",
             cursor: "pointer",
           }}
+          onClick={() => router.push("/")}
         >
           Back to Home
         </button>
-        {categoryId && (
-          <button
-            onClick={() => router.push(`/category/${categoryId}`)}
-            style={{
-              padding: "0.5rem 1rem",
-              fontSize: "1rem",
-              backgroundColor: "#007bff",
-              color: "#fff",
-              borderRadius: "8px",
-              border: "1px solid #ccc",
-              cursor: "pointer",
-            }}
-          >
-            Back to Category
-          </button>
-        )}
+        <button
+          style={{
+            padding: "0.5rem 1rem",
+            fontSize: "1rem",
+            backgroundColor: "#5d5c5c",
+            color: "#fff",
+            borderRadius: "8px",
+            border: "1px solid #ccc",
+            cursor: "pointer",
+          }}
+          onClick={() => router.back()}
+        >
+          Back to Previous Category
+        </button>
       </div>
 
       {/* WhatsApp Share Button */}
