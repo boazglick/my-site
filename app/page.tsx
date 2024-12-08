@@ -39,7 +39,7 @@ export default function HomePage() {
       {/* Logo */}
       <img
         src="/logo.png" // Replace with your actual logo file path
-        alt="App Logo"
+        alt="Kavkav logo"
         style={{ maxWidth: "200px", marginBottom: "2rem" }}
       />
 
