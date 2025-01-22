@@ -14,7 +14,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchCategories = async () => {
       const apiKey = "AIzaSyDtQcbLJO5wYNBcAjsvBTkyespCa57RHmU";
-      const folderId = "1--jkUTbUNvCgFgExpoyHWsJQo-wyAHl4"; // Replace with your root folder ID
+      const folderId = "1sIrPmGjQS4GghBYi0Vmtf3-nKhV-73Ji"; // Replace with your root folder ID
       const response = await fetch(
         `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents&key=${apiKey}`
       );
