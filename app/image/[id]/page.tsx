@@ -25,7 +25,7 @@ export default function ImagePage() {
   }, [id]);
 
   const handleWhatsAppShare = () => {
-    const whatsappUrl = `https://wa.me/972723969466?text=${encodeURIComponent(imageUrl)}`;
+    const whatsappUrl = `https://api.whatsapp.com/send/?phone=972723969466&text=${encodeURIComponent(imageUrl)}&type=phone_number&app_absent=0`;
     window.open(whatsappUrl, "_blank");
   };
 
@@ -114,7 +114,7 @@ export default function ImagePage() {
             cursor: "pointer",
           }}
         >
-          Share on WhatsApp
+          Share on WhatsApp link
         </button>
       </div>
     </div>
