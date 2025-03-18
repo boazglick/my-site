@@ -14,18 +14,18 @@ export default function ImagePage() {
     const fetchImageData = async () => {
       const apiKey = "AIzaSyDtQcbLJO5wYNBcAjsvBTkyespCa57RHmU"; // Replace with your actual API key
       const response = await fetch(
-        `https://www.googleapis.com/drive/v3/files/${id}?fields=name,webContentLink&key=${apiKey}`
+        `https://www.googleapis.com/drive/v3/files/${id}?fields=name,webViewLink&key=${apiKey}`
       );
       const data = await response.json();
       setImageName(data.name || "Image Viewer"); // Fallback if no name is returned
-      setImageUrl(data.webContentLink || ""); // Set the image URL
+      setImageUrl(data.webViewLink || ""); // Set the public URL
     };
 
     fetchImageData();
   }, [id]);
 
   const handleWhatsAppShare = () => {
-    const whatsappUrl = `https://api.whatsapp.com/send/?phone=972723969466&text=${encodeURIComponent(imageUrl)}&type=phone_number&app_absent=0`;
+    const whatsappUrl = `https://web.whatsapp.com/send/?phone=972723969466&text=${encodeURIComponent(imageUrl)}&type=phone_number&app_absent=0`;
     window.open(whatsappUrl, "_blank");
   };
 
