@@ -14,11 +14,11 @@ export default function ImagePage() {
     const fetchImageData = async () => {
       const apiKey = "AIzaSyDtQcbLJO5wYNBcAjsvBTkyespCa57RHmU"; // Replace with your actual API key
       const response = await fetch(
-        `https://www.googleapis.com/drive/v3/files/${id}?fields=name,webContentLink&key=${apiKey}`
+        `https://www.googleapis.com/drive/v3/files/${id}?fields=name&key=${apiKey}`
       );
       const data = await response.json();
       setImageName(data.name || "Image Viewer"); // Fallback if no name is returned
-      setImageUrl(data.webContentLink || ""); // Set the public URL
+      setImageUrl(`https://drive.google.com/uc?id=${id}&export=download`); // Construct public download link
     };
 
     fetchImageData();
