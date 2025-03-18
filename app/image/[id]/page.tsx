@@ -3,7 +3,11 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function ImagePage() {
+interface ImagePageProps {
+  previousCategoryName: string;
+}
+
+export default function ImagePage({ previousCategoryName }: ImagePageProps) {
   const { id } = useParams(); // The file ID passed from the URL
   const router = useRouter();
   const iframeUrl = `https://drive.google.com/file/d/${id}/preview`; // Using Google Drive's embed preview link
@@ -26,7 +30,8 @@ export default function ImagePage() {
 
   const handleWhatsAppShare = () => {
     const pageUrl = `${window.location.origin}/image/${id}`;
-    const whatsappUrl = `https://api.whatsapp.com/send/?phone=972723969466&text=${encodeURIComponent(pageUrl)}&type=phone_number&app_absent=0`;
+    const message = `Check out this image from the ${previousCategoryName} category: ${imageName}. View it here: ${pageUrl}`;
+    const whatsappUrl = `https://api.whatsapp.com/send/?phone=972723969466&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
     window.open(whatsappUrl, "_blank");
   };
 
