@@ -25,8 +25,7 @@ export default function ImagePage() {
   }, [id]);
 
   const handleWhatsAppShare = () => {
-    const pageUrl = `${window.location.origin}/image/${id}`;
-    const message = `Check out this image: ${imageName}. View it here: ${pageUrl}`;
+    const message = `Check out this image: ${imageName}`;
     const whatsappUrl = `https://api.whatsapp.com/send/?phone=972723969466&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
     window.open(whatsappUrl, "_blank");
   };
