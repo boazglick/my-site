@@ -100,6 +100,28 @@ export default function ImagePage() {
         </button>
       </div>
 
+      {/* Download Button */}
+      <div style={{ marginTop: "1rem", textAlign: "center" }}>
+        <a
+          href={imageUrl}
+          download={imageName}
+          style={{
+            display: "inline-block",
+            padding: "0.5rem 1rem",
+            fontSize: "1rem",
+            backgroundColor: "#007acc",
+            color: "#fff",
+            borderRadius: "8px",
+            border: "1px solid #ccc",
+            cursor: "pointer",
+            textDecoration: "none",
+            marginBottom: "1rem",
+          }}
+        >
+          Download Image
+        </a>
+      </div>
+
       {/* WhatsApp Share Button */}
       <div style={{ marginTop: "1rem", textAlign: "center" }}>
         <button
